@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <input type="file" id="rb">
+        <button onclick="obtengo()">click</button>
+        <button onclick="crear()">crear</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script>
+
+        function getBase64FomFile(img, callback) {
+            let fileReader = new FileReader();
+            fileReader.addEventListener('load', function (evt) {
+                callback(fileReader.result);
+            });
+            fileReader.readAsDataURL(img);
+        }
+let mantengo=(x)=>{
+    localStorage.setItem('image',JSON.stringify(x))
+     return x}
+        function obtengo() {
+            let image = document.getElementById('rb')
+       let perfil=     getBase64FomFile(image.files[0], function (base64) {
+              console.log(base64)
+              mantengo(base64) 
+           
+            });
+    
+
+        }
+        function b64toBlob(b64Data, contentType, sliceSize) {
+            contentType = contentType || '';
+            sliceSize = sliceSize || 512;
+
+            var byteCharacters = atob(b64Data);
+            var byteArrays = [];
+
+            for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                var byteNumbers = new Array(slice.length);
+                for (var i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+
+                var byteArray = new Uint8Array(byteNumbers);
+
+                byteArrays.push(byteArray);
+            }
+
+            var blob = new Blob(byteArrays, { type: contentType });
+            return blob;
+        }
+
+      let crear=()=>{
+        let imagen = JSON.parse(window.localStorage.getItem('image'));
+          console.log(imagen)
+        var ImageURL = imagen;
+// Split the base64 string in data and contentType
+var block = ImageURL.split(";");
+// Get the content type of the image
+var contentType = block[0].split(":")[1];// In this case "image/gif"
+// get the real base64 content of the file
+var realData = block[1].split(",")[1];// In this case "R0lGODlhPQBEAPeoAJosM...."
+
+// Convert it to a blob to upload
+var blob = b64toBlob(realData, contentType);
+var data = new FormData();
+       
+            data.append("image", blob);
+            axios.post("http://localhost/prueba/recibo.php", data, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            }).then((response) => {
+            //   response.data.imagen
+              console.log(response.data)
+              
+            }).catch((e) => {
+              // console.log(e.response)
+            });
+console.log(blob)
+      }  
+
+/* Seria usada de la siguiente manera */
+
+//     var app = new Vue({
+//   el: '#app',
+//   data: {
+
+//   },
+//   methods:{
+
+//   }
+// })
+
+    </script>
+</body>
+
+</html>
